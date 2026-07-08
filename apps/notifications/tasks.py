@@ -3,6 +3,8 @@ from django.db import transaction
 from apps.notifications.models import Notification, statusChoices
 import time
 import logging
+from django.core.mail import send_mail
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,13 @@ def send_notification_task(notification_id):
       notification = Notification.objects.get(id=notification_id)
       notification.status = statusChoices.PROCESSING
     logger.info(f"Sending notification {notification_id}")
-    time.sleep(3)
+    send_mail(
+          subject=notification.payload.get('subject', 'No subject'),
+          message=notification.payload.get('text', ''),
+          from_email=settings.EMAIL_HOST_USER,
+          recipient_list=[notification.recipient],
+          fail_silently=False,
+    )
     with transaction.atomic():
       notification.status = statusChoices.SENT
   except Exception as e:
