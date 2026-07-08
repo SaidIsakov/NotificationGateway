@@ -16,6 +16,34 @@ services:
       retries: 10
       start_period: 10s
 
+  redis:
+    image: redis:latest
+    container_name: notification_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  celery_worker:
+    build: .
+    container_name: notification_celery
+    command: celery -A conf worker -l info
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DB_HOST: postgres
+    volumes:
+      - ./:/app
+
   app:
     build: .
     container_name: notification_app
@@ -26,6 +54,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       DB_HOST: postgres
     volumes:
@@ -33,3 +63,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
