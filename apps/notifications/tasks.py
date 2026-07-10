@@ -17,22 +17,23 @@ def send_notification_task(self, notification_id):
   notification = None
   try:
     with transaction.atomic():
-      if notification:
-        notification = Notification.objects.get(id=notification_id)
-        notification.status = statusChoices.PROCESSING
-        notification.save()
+      notification = Notification.objects.get(id=notification_id)
+      notification.status = statusChoices.PROCESSING
+      notification.save()
     logger.info(f"Sending notification {notification_id}")
-    if notification:
-      if notification.channel == channelChoices.EMAIL:
-        send_mail(
-            subject=notification.payload.get('subject', 'No subject'),
-            message=notification.payload.get('text', ''),
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[notification.recipient],
-            fail_silently=False,
-        )
-      else:
-        send_notification_from_tg(notification)
+    if notification.channel == channelChoices.EMAIL:
+      send_mail(
+          subject=notification.payload.get('subject', 'No subject'),
+          message=notification.payload.get('text', ''),
+          from_email=settings.EMAIL_HOST_USER,
+          recipient_list=[notification.recipient],
+          fail_silently=False,
+      )
+    else:
+      send_notification_from_tg(notification)
+    with transaction.atomic():
+      notification.status = statusChoices.SENT
+      notification.save()
   except Notification.DoesNotExist:
     logger.error(f"Notification {notification_id} does not exist")
     raise
