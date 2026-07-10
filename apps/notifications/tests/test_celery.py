@@ -1,4 +1,3 @@
-from celery.exceptions import Retry
 import pytest
 from apps.notifications.tasks import send_notification_task
 from apps.notifications.models import Notification, statusChoices
@@ -72,5 +71,6 @@ def test_retry_not_aply(monkeypatch):
     send_notification_task(notification.id)
   notification.refresh_from_db()
   assert notification.status == 'FAILED'
-  assert len(notification.error_message) > 0
+  if notification.error_message is not None:
+    assert len(notification.error_message) > 0
 

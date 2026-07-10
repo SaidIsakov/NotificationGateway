@@ -44,9 +44,9 @@ def send_notification_task(self, notification_id):
 
     if notification:
       current_error_message = notification.error_message
-
-      if current_error_message:
-        notification.error_message = notification.error_message + "\n" + new_line # type: ignore
+      if notification.error_message is not None:
+        if current_error_message:
+          notification.error_message = notification.error_message + "\n" + new_line
       else:
         notification.error_message = new_line
       notification.save()
