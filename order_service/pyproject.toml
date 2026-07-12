@@ -1,0 +1,9 @@
+[project]
+name = "order-service"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "djangorestframework>=3.17.1",
+    "psycopg2-binary>=2.9.12",
+    "python-decouple>=3.8",
+]
