@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: warehouse_postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      microservices_net:
+        aliases:
+          - warehouse_db
+
+  app:
+    build: .
+    container_name: warehouse_app
+    env_file:
+      - .env
+    ports:
+      - "8015:8015"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: warehouse_db
+    volumes:
+      - ./:/app
+    networks:
+      - microservices_net
+
+volumes:
+  postgres_data:
+
+networks:
+  microservices_net:
+    name: microservices_net
+    external: true
