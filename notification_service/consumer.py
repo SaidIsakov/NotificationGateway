@@ -1,4 +1,5 @@
 import json
+from venv import logger
 from rabbitmq import connect_rabbitmq
 import django
 import os
@@ -23,12 +24,15 @@ def on_message(channel, method, properties, body):
       channel_type = 'EMAIL'
       recipient = data['user_email']
 
-    if event_type == 'order.created':
-      subject = f'Заказ {data["order_id"]} принят!'
-      text = f'Вы заказали {data["product"]} на сумму {data["price"]}. Ожидаем оплату.'
+    if event_type == 'order.cancelled':
+      subject = f"Заказ {data['order_id']} отменен"
+      text = f"Извините, но на складе закончился товар: {data['product_name']}"
     elif event_type == 'order.paid':
       subject = f'Заказ {data["order_id"]} оплачен!'
       text = f'Спасибо! Мы уже начали собирать ваш {data["product"]}.'
+    elif event_type == 'order.created':
+      subject = f'Заказ {data["order_id"]} принят!'
+      text = f'Вы заказали {data["product"]} на сумму {data["price"]}. Ожидаем оплату.'
     else:
       print(f" [!] Неизвестное событие: {event_type}")
       channel.basic_ack(delivery_tag=method.delivery_tag)
@@ -59,6 +63,7 @@ if __name__ == '__main__':
 
   channel.queue_bind(queue='notification_queue', exchange='order_events', routing_key='order.created')
   channel.queue_bind(queue='notification_queue', exchange='order_events', routing_key='order.paid')
+  channel.queue_bind(queue='notification_queue', exchange='order_events', routing_key='order.cancelled')
 
   print(" [*] Слушаю очередь... Нажми CTRL+C для выхода")
 

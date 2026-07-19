@@ -36,6 +36,26 @@ services:
     networks:
       - microservices_net
 
+  consumer:
+    build: .
+    container_name: warehouse_consumer
+    command: python consumer.py
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: warehouse_db
+      DB_PORT: 5432
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    volumes:
+      - ./:/app
+    networks:
+      - microservices_net
+
+
 volumes:
   postgres_data:
 

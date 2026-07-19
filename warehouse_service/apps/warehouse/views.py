@@ -15,15 +15,6 @@ class WarehouseAPIView(APIView):
     product_slug = slugify(product_name)
     try:
       product = Product.objects.get(slug=slugify(product_slug))
-      if product.stock > 0:
-        product.stock -= 1
-        product.save()
-        logger.info(f"The {product.name} written off")
-        return Response({"status": f"The {product.name} written off"}, status=200)
-      elif product.stock == 0:
-        logger.warning(f"Товар {product.name} закончился на складе!")
-        return Response({"status": "out_of_stock", "message": "Товара нет в наличии"}),
-
+      return Response({"name": product.name, "stock": product.stock}, status=200)
     except Product.DoesNotExist:
-      logger.warning(f"Товар с названием/slug '{product_name}' не найден на складе")
       return Response({"status": "Product does not exist"}, status=404)
