@@ -1,3 +1,11 @@
 from django.contrib import admin
+from apps.analytics.models import OrderEvent, DailyMetrics
 
-# Register your models here.
+@admin.register(OrderEvent)
+class OrderEventAdmin(admin.ModelAdmin):
+  pass
+
+
+@admin.register(DailyMetrics)
+class DailyMetricsAdmin(admin.ModelAdmin):
+  pass

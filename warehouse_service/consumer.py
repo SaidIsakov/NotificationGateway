@@ -1,10 +1,8 @@
-from codecs import lookup
 import json
 import logging
 import os
 from django.utils.text import slugify
 from publisher import send_warehouse_exchange
-import sys
 
 
 logger = logging.getLogger(__name__)
@@ -22,13 +20,12 @@ def on_message(channel, method, properties, body):
     data = json.loads(body)
     event_type = data.get('event')
     order_id = data.get('order_id')
-    product_name = data.get('product')
+    product_name = data.get('product_name')
     user_email = data.get('user_email')
     user_telegram_id = data.get('user_telegram_id')
 
     try:
       product_slug = slugify(product_name)
-      sys.stdout.flush()
       product = Product.objects.get(slug=product_slug)
       logger.info(f"3. Товар найден: {product.name}, остаток: {product.stock} !!!")
 

@@ -18,8 +18,8 @@ def send_orders_exchange(order, event_type: str):
         'order_id': str(order.id),
         'user_email': order.user_email,
         'user_telegram_id': order.user_telegram_id,
-        'product': order.product_name,
-        'price': str(order.price)
+        'product_name': order.product_name,
+        'price': str(order.price),
     }
 
     channel.basic_publish(

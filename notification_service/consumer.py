@@ -24,15 +24,12 @@ def on_message(channel, method, properties, body):
       channel_type = 'EMAIL'
       recipient = data['user_email']
 
-    if event_type == 'order.cancelled':
+    if event_type == 'order.paid':
+      subject = f'Заказ {data["order_id"]} оплачен!'
+      text = f'Спасибо! Мы уже начали собирать ваш {data["product_name"]}.'
+    elif event_type == 'order.cancelled':
       subject = f"Заказ {data['order_id']} отменен"
       text = f"Извините, но на складе закончился товар: {data['product_name']}"
-    elif event_type == 'order.paid':
-      subject = f'Заказ {data["order_id"]} оплачен!'
-      text = f'Спасибо! Мы уже начали собирать ваш {data["product"]}.'
-    elif event_type == 'order.created':
-      subject = f'Заказ {data["order_id"]} принят!'
-      text = f'Вы заказали {data["product"]} на сумму {data["price"]}. Ожидаем оплату.'
     else:
       print(f" [!] Неизвестное событие: {event_type}")
       channel.basic_ack(delivery_tag=method.delivery_tag)
